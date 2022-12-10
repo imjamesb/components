@@ -24,7 +24,13 @@ export default function Page({
       <div class="flex">
         <Sidebar items={sidebar} url={props.url.pathname} />
         <div class="block w-full max-w-screen-lg p-8 overflow-y-auto">
-          {category ? <div>{category}</div> : undefined}
+          {category
+            ? (
+              <div class="text-sm font-bold text-blue-600 mb-1 select-none">
+                {category}
+              </div>
+            )
+            : undefined}
           {children}
         </div>
       </div>

@@ -13,6 +13,7 @@ export interface ServeItemMapping {
   file: ServeItemFile;
   markdown: ServeItemMarkdown;
   story: ServeItemStory;
+  redirect: ServeItemRedirect;
 }
 export type ServeItem = ServeItemMapping[keyof ServeItemMapping];
 export interface ServeItemFile {
@@ -26,6 +27,7 @@ export interface ServeItemMarkdownDir {
   type: "markdown";
   layout?: string;
   dir: string;
+  categoryName?: string;
 }
 export interface ServeItemMarkdownFile {
   type: "markdown";
@@ -36,9 +38,23 @@ export interface ServeItemMarkdownFile {
   title?: string;
 }
 export type ServeItemMarkdown = ServeItemMarkdownDir | ServeItemMarkdownFile;
-export interface ServeItemStory {
+export interface ServeItemStoryDir {
   type: "story";
-  layout?: string;
-  dir?: string;
-  file?: string;
+  dir: string;
+  prefix?: string;
+  categoryName?: string;
+}
+export interface ServeItemStoryFile {
+  type: "story";
+  file: string;
+  route?: string;
+  title?: string;
+  categoryName?: string;
+}
+export type ServeItemStory = ServeItemStoryDir | ServeItemStoryFile;
+export interface ServeItemRedirect {
+  type: "redirect";
+  pattern: string;
+  to: string;
+  status?: number;
 }

@@ -1,14 +1,14 @@
 import { RoutesDocument } from "./types.ts";
 
 export default [
-  { serve: [{ type: "file", file: "/index.tsx", route: "/" }] },
   {
-    serve: [{
-      type: "file",
-      file: "/deno-import-intellisense.ts",
-      route: "/.well-known/deno-import-intellisense.json",
-      manual: true,
-    }],
+    serve: [
+      { type: "file", file: "/other/index.tsx", route: "/" },
+      { type: "file", file: "/other/intellisense.ts", manual: true },
+      { type: "file", file: "/other/module.ts", manual: true },
+      { type: "file", file: "/other/moduleVersion.ts", manual: true },
+      { type: "redirect", pattern: "/docs", to: "/docs/introduction" },
+    ],
   },
   {
     sidebar: { name: "getting-started", title: "Getting Started" },
@@ -19,11 +19,12 @@ export default [
     }],
   },
   {
-    sidebar: { name: "components", title: "Components" },
+    sidebar: { name: "component", title: "Components" },
     serve: [{
       type: "story",
-      dir: "/stories",
-      layout: "./layout/DocumentationPage.tsx",
+      dir: "/",
+      prefix: "/component",
+      categoryName: "component",
     }],
   },
 ] as RoutesDocument;

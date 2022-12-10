@@ -6,7 +6,10 @@ import type {
   ServeItemMapping,
   ServeItemMarkdownDir,
   ServeItemMarkdownFile,
+  ServeItemStoryDir,
+  ServeItemStoryFile,
 } from "./types.ts";
+import { Story } from "story";
 import dev from "$fresh/dev.ts";
 import routes from "./routes.ts";
 import {
@@ -64,6 +67,11 @@ async function sha2(contents: string): Promise<string> {
   ].map((n) => n.toString(16).padStart(2, "0")).join("");
 }
 
+let _datalessShaSeed = "\x00";
+async function datalessSha2(): Promise<string> {
+  return _datalessShaSeed = await sha2(_datalessShaSeed);
+}
+
 const fileRouteTmpl = await parseTemplateFromFile<"hash" | "pattern">(
   "./layout/templates/[file-route].tsx",
 );
@@ -75,8 +83,13 @@ const mdTmpl = await parseTemplateFromFile<
 >(
   "./layout/templates/[markdown-layout].tsx",
 );
-const storyTmpl = await parseTemplateFromFile(
+const storyTmpl = await parseTemplateFromFile<
+  "relativePathToStory" | "relativeLayoutPath" | "category" | "title"
+>(
   "./layout/templates/[story].tsx",
+);
+const redirectTmpl = await parseTemplateFromFile<"pattern" | "url" | "status">(
+  "./layout/templates/[redirect].tsx",
 );
 
 const builders: {
@@ -84,6 +97,24 @@ const builders: {
     config: BuildConfig<ServeItemMapping[key]>,
   ) => Promise<void>;
 } = {
+  redirect: async (config) => {
+    config.serveItem.status = config.serveItem.status || 307;
+    const hash = await datalessSha2() + ".ts";
+    await Deno.writeTextFile(
+      join(config.outRoute, hash),
+      redirectTmpl({
+        pattern: config.serveItem.pattern,
+        status: config.serveItem.status as unknown as string,
+        url: config.serveItem.to,
+      }),
+    );
+    console.log(
+      "Build (redirect): %s -> %d %s",
+      config.serveItem.pattern,
+      config.serveItem.status,
+      config.serveItem.to,
+    );
+  },
   file: async (config) => {
     const item = { ...config.serveItem };
     item.file = relative(config.srcDir, item.file);
@@ -107,13 +138,16 @@ const builders: {
         });
       }
     } else {
+      const p = join(config.outRoute, hash + extname(item.file));
       await Deno.copyFile(
         item.file,
         join(config.outRoute, hash + extname(item.file)),
       );
+      const { config: { routeOverride } } = await import(p);
+      item.route = routeOverride;
     }
     console.log(
-      "Build (file ): %s -> %s",
+      "Build (file    ): %s -> %s",
       relativeTo(config.base, item.file),
       item.route,
     );
@@ -136,7 +170,7 @@ const builders: {
     }
     item.layout = relative(
       config.base,
-      item.layout || "./layout/DocumentationPage.ts",
+      item.layout || "./layout/DocumentationPage.tsx",
     );
     // deno-lint-ignore no-explicit-any
     if ((item as any).dir) {
@@ -183,15 +217,18 @@ const builders: {
         }
         categoryTitle = sidebarConfig[i.categoryName].title || i.categoryName;
       } else if (i.categoryName && !(i.categoryName in sidebarConfig)) {
-        const config = sidebarConfig[i.categoryName] = {
+        config.category = sidebarConfig[i.categoryName] = {
           items: [],
         } as SidebarConfig[string];
         if (categoryTitle) {
-          config.title = categoryTitle;
+          config.category.title = categoryTitle;
         }
       }
-      if (i.categoryName && i.categoryName in sidebarConfig && i.title) {
-        sidebarConfig[i.categoryName].items.push({
+      if (
+        config.category &&
+        i.title
+      ) {
+        config.category.items.push({
           name: i.title,
           to: i.route,
         });
@@ -207,13 +244,120 @@ const builders: {
         }),
       );
       console.log(
-        "Build (md   ): %s -> %s",
+        "Build (md      ): %s -> %s",
         relativeTo(config.base, i.file),
         i.route,
       );
     }
   },
   story: async (config) => {
+    const item = { ...config.serveItem };
+    // deno-lint-ignore no-explicit-any
+    if ((item as any).dir) {
+      // deno-lint-ignore no-explicit-any
+      (item as any).dir = relative(config.srcDir, (item as any).dir);
+    }
+    // deno-lint-ignore no-explicit-any
+    if ((item as any).file) {
+      // deno-lint-ignore no-explicit-any
+      (item as any).file = relative(config.srcDir, (item as any).file);
+    }
+    // deno-lint-ignore no-explicit-any
+    if ((item as any).dir && (item as any).file) {
+      throw new Error("Either use file or dir, not both (on story)!");
+    }
+    // deno-lint-ignore no-explicit-any
+    if ((item as any).dir) {
+      const i = item as ServeItemStoryDir;
+      for await (
+        const entry of expandGlob(
+          join(i.dir, "**/*.story.tsx"),
+        )
+      ) {
+        if (!entry.isFile) continue;
+        const proposedUrl = (i.prefix || "") + "/" +
+          _relativeTo(config.srcDir, entry.path).slice(0, -10).toLowerCase();
+        await builders.story({
+          ...config,
+          serveItem: {
+            ...item,
+            dir: undefined,
+            file: entry.path,
+            route: proposedUrl,
+          },
+        });
+      }
+    } else {
+      const i = item as ServeItemStoryFile;
+
+      const hash = await sha2(i.file);
+
+      if (!i.route) {
+        console.debug(i);
+        throw new Error("No route to file!");
+      }
+
+      // deno-lint-ignore no-explicit-any
+      let story!: Story<any>;
+
+      try {
+        story = (await import(i.file)).default;
+        if (!(story instanceof Story)) {
+          throw new Error("A story's default export must be a Story object!");
+        }
+      } catch (error) {
+        throw error;
+      }
+
+      i.title = i.title || story.title;
+
+      let categoryTitle = i.categoryName;
+
+      if (
+        sidebarConfig && i.categoryName && !(i.categoryName in sidebarConfig)
+      ) {
+        const config = sidebarConfig[i.categoryName] = {
+          items: [],
+        } as SidebarConfig[string];
+        if (categoryTitle) {
+          config.title = categoryTitle;
+        }
+      }
+
+      if (config.category && i.title) {
+        config.category.items.push({
+          name: i.title,
+          to: i.route,
+        });
+      }
+
+      await Deno.writeTextFile(
+        relative(config.outIsland, hash + ".tsx"),
+        storyTmpl({
+          title: i.title,
+          relativeLayoutPath: relativeTo(
+            config.outIsland,
+            "./layout/DocumentationPage.tsx",
+          ),
+          category: config.category?.title || categoryTitle || "",
+          relativePathToStory: relativeTo(config.outIsland, i.file),
+        }),
+      );
+
+      await Deno.writeTextFile(
+        relative(config.outRoute, hash + ".tsx"),
+        fileRouteTmpl({
+          hash,
+          pattern: i.route,
+        }),
+      );
+
+      console.log(
+        "Build (story   ): %s -> %s",
+        relativeTo(config.base, i.file),
+        i.route,
+      );
+    }
   },
 };
 

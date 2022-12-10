@@ -36,7 +36,7 @@ function Category(
 ) {
   return (
     <div class="select-none mt-5 first-child:(mt-0)">
-      <div class="font-bold select-none mb-2">{name}</div>
+      <div class="font-bold select-none mb-2 text-sm">{name}</div>
       <div>
         {items.map((item) => (
           <SidebarItem name={item.name} to={item.to} url={url} />
@@ -52,9 +52,11 @@ function SidebarItem(
   return (
     <a href={to}>
       <div
-        class={tw`pl-4 pt-1 pb-1 (border(l-2 gray-400) text-gray-700) hover:(border(l-2 gray-800) text-gray-900) ${
-          url === to ? "text-blue-600 border-blue-700" : ""
-        }`}
+        class={tw`pl-4 pt-1 pb-1 (${
+          url === to
+            ? "border(l-2! blue-600!) text-blue-600!"
+            : "border(l-2 gray-300) text-gray-600"
+        }) hover:(border(l-2 gray-500) text-black) transition-colors`}
       >
         {name}
       </div>

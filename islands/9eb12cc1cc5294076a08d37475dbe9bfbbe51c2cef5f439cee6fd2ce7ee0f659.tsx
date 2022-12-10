@@ -1,7 +1,7 @@
 import type { PageProps } from "$fresh/server.ts";
 import type { Story } from "story";
-import _story from "<?relativePathToStory?>";
-import Layout from "<?relativeLayoutPath?>";
+import _story from "../src/Button.story.tsx";
+import Layout from "../layout/DocumentationPage.tsx";
 import { CSS } from "https://deno.land/x/gfm@0.1.26/mod.ts";
 import { Head } from "$fresh/runtime.ts";
 import sidebarConfig from ".sidebar-config";
@@ -10,8 +10,8 @@ import { tw } from "twind";
 // deno-lint-ignore no-explicit-any
 const story = _story as unknown as Story<any>;
 
-const _category = `<?category?>`;
-const _title = `<?title?>`;
+const _category = `Components`;
+const _title = `Button`;
 
 export default function Page({ props }: { props: PageProps }) {
   return (
