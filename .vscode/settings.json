@@ -2,5 +2,17 @@
   "deno.enable": true,
   "deno.lint": true,
   "editor.defaultFormatter": "denoland.vscode-deno",
-  "editor.insertSpaces": true
+  "editor.insertSpaces": true,
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/CVS": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true
+    //"islands/": true,
+    //"routes/": true,
+    //"deno.lock": true,
+    //".sidebar.ts": true
+  }
 }

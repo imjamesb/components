@@ -1,12 +1,16 @@
 import { RoutesDocument } from "./types.ts";
 
 export default [
+  { serve: [{ type: "file", file: "/index.tsx", route: "/" }] },
   {
-    outDir: "/",
-    serve: [{ type: "file", file: "/index.tsx", route: "/" }],
+    serve: [{
+      type: "file",
+      file: "/deno-import-intellisense.ts",
+      route: "/.well-known/deno-import-intellisense.json",
+      manual: true,
+    }],
   },
   {
-    outDir: "/docs",
     sidebar: { name: "getting-started", title: "Getting Started" },
     serve: [{
       type: "markdown",
@@ -15,7 +19,6 @@ export default [
     }],
   },
   {
-    outDir: "/docs",
     sidebar: { name: "components", title: "Components" },
     serve: [{
       type: "story",

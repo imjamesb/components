@@ -3,10 +3,27 @@
 // This file is automatically updated during development when running `dev.ts`.
 
 import config from "./deno.json" assert { type: "json" };
+import * as $0 from "./routes/2b6ef1fd5632066c64ea44a0b606254458afefd93beab939fa085feb1b800bb5.tsx";
+import * as $1 from "./routes/413206d35fdb352979c660cf964cf687ff0fff68ea22cabbd67715bba2f41be2.tsx";
+import * as $2 from "./routes/77cab40946512f642a461cfb087604c43482cc49ef6bb1e5944a6b9894c7946b.tsx";
+import * as $3 from "./routes/991d0a09fd3caf42e5bdfbb5e3dd46f68d8d10a1ea5c06da3c504522d06102a6.ts";
+import * as $$0 from "./islands/413206d35fdb352979c660cf964cf687ff0fff68ea22cabbd67715bba2f41be2.tsx";
 
 const manifest = {
-  routes: {},
-  islands: {},
+  routes: {
+    "./routes/2b6ef1fd5632066c64ea44a0b606254458afefd93beab939fa085feb1b800bb5.tsx":
+      $0,
+    "./routes/413206d35fdb352979c660cf964cf687ff0fff68ea22cabbd67715bba2f41be2.tsx":
+      $1,
+    "./routes/77cab40946512f642a461cfb087604c43482cc49ef6bb1e5944a6b9894c7946b.tsx":
+      $2,
+    "./routes/991d0a09fd3caf42e5bdfbb5e3dd46f68d8d10a1ea5c06da3c504522d06102a6.ts":
+      $3,
+  },
+  islands: {
+    "./islands/413206d35fdb352979c660cf964cf687ff0fff68ea22cabbd67715bba2f41be2.tsx":
+      $$0,
+  },
   baseUrl: import.meta.url,
   config,
 };
