@@ -15,7 +15,7 @@ const doc = new Response(
   JSON.stringify({
     version: 2,
     registries: [{
-      schema: "/x/:module([a-z0-9_]+)@:version?/:path*",
+      schema: "/x@:version?/:path*",
       variables: [{
         key: "version",
         documentation:
