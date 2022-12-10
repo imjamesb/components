@@ -1,5 +1,5 @@
 import type { JSX } from "preact";
-import { take } from "../util/componentUtil.ts";
+import { take } from "./_/util.ts";
 
 export interface ButtonOptions {
   importance?: "primary" | "secondary";
