@@ -3,6 +3,12 @@
   "deno.lint": true,
   "editor.defaultFormatter": "denoland.vscode-deno",
   "editor.insertSpaces": true,
+  "deno.suggest.imports.hosts": {
+    "https://deno.land": true,
+    "https://x.nest.land": true,
+    "https://crux.land": true,
+    "https://component.deno.dev": true
+  },
   "files.exclude": {
     "**/.git": true,
     "**/.svn": true,
